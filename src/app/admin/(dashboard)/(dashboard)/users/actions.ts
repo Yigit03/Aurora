@@ -6,6 +6,9 @@ import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabase'
 import { verifyAccesToken } from '@/lib/jwt'
 
+const isAdmin = (role: string) => ['superadmin', 'admin'].includes(role)
+const isEditor = (role: string) => ['superadmin', 'admin', 'editor'].includes(role)
+
 /**
  * Kullanıcı Silme Action
  * @param userId - Silinecek kullanıcının ID'si
@@ -73,7 +76,7 @@ export async function deleteUserAction(userId: string) {
     }
 
     // 6. Kendi hesabını silemez
-    if (targetUser.id === currentUser.userId) {
+    if (targetUser.id === currentUser.sub) {
       return {
         success: false,
         message: 'Kendi hesabınızı silemezsiniz',
@@ -97,7 +100,7 @@ export async function deleteUserAction(userId: string) {
 
     // 8. Activity log kaydet (silinen kullanıcının kendi log'u silindiği için, silen kişinin log'una yazıyoruz)
     await supabase.from('activity_logs').insert({
-      user_id: currentUser.userId,
+      user_id: currentUser.sub,
       action: 'delete_user',
       entity_type: 'user',
       entity_id: userId,

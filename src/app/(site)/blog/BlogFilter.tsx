@@ -1,14 +1,13 @@
-// BlogFilter.tsx
-"use client";
+"use client"
 
-import { Search } from "lucide-react";
-import { CATEGORIES } from "@/lib/blogData";
+import { Search } from "lucide-react"
+import { CATEGORIES } from "@/lib/blogData"
 
 interface BlogFilterProps {
-  search: string;
-  activeCategory: string;
-  onSearchChange: (value: string) => void;
-  onCategoryChange: (category: string) => void;
+  search: string
+  activeCategory: string
+  onSearchChange: (value: string) => void
+  onCategoryChange: (category: string) => void
 }
 
 export default function BlogFilter({
@@ -48,5 +47,5 @@ export default function BlogFilter({
         ))}
       </div>
     </div>
-  );
+  )
 }

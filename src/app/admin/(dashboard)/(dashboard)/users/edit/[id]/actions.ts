@@ -1,174 +1,139 @@
+// app/admin/(dashboard)/users/edit/[id]/actions.ts
+
 'use server'
-// Kullanıcı düzenleme action'ı
 
-import { redirect } from 'next/navigation'
+import { supabaseAdmin } from '@/lib/supabase'
 import { cookies } from 'next/headers'
+import { verifyAccesToken } from '@/lib/jwt'
 import bcrypt from 'bcryptjs'
-import { supabase } from '@/lib/supabase'
-import { verifyToken } from '@/lib/auth'
-import { updateUserSchema } from '@/lib/validations'
+import { redirect } from 'next/navigation'
 
-/**
- * Kullanıcı Güncelleme Action
- * @param userId - Güncellenecek kullanıcının ID'si
- * @param prevState - Önceki form state'i
- * @param formData - Form verisi
- */
-export async function updateUserAction(
-  userId: string,
-  prevState: any,
-  formData: FormData
-) {
-  try {
-    // 1. Token kontrolü
-    const cookieStore = await cookies()
-    const token = cookieStore.get('auth-token')?.value
+export const getUserById = async (id: string) => {
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('id, fullname, email, role')
+    .eq('id', id)
+    .single()
 
-    if (!token) {
-      return {
-        success: false,
-        message: 'Oturum bulunamadı',
-      }
-    }
+  if (error) return null
+  return data
+}
 
-    // Token'ı doğrula
-    const currentUser = await verifyToken(token)
+export const updateUser = async (
+  id: string,
+  formData: {
+    fullname: string
+    email: string
+    role: 'admin' | 'editor'
+    password?: string
+  }
+) => {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('admin_token')?.value
 
-    if (!currentUser) {
-      return {
-        success: false,
-        message: 'Geçersiz oturum',
-      }
-    }
+  if (!token) return { success: false, message: 'Yetkisiz erişim.' }
 
-    // Yetki kontrolü
-    if (currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
-      return {
-        success: false,
-        message: 'Bu işlem için yetkiniz yok',
-      }
-    }
+  const currentUser = await verifyAccesToken(token)
 
-    // 2. Güncellenecek kullanıcıyı getir
-    const { data: targetUser, error: fetchError } = await supabase
-      .from('users')
-      .select('id, role, email')
-      .eq('id', userId)
-      .single()
+  if (!currentUser) return { success: false, message: 'Yetkisiz erişim.' }
 
-    if (fetchError || !targetUser) {
-      return {
-        success: false,
-        message: 'Kullanıcı bulunamadı',
-      }
-    }
-
-    // 3. Süper admin düzenlenemez
-    if (targetUser.role === 'super_admin') {
-      return {
-        success: false,
-        message: 'Süper admin kullanıcı düzenlenemez',
-      }
-    }
-
-    // 4. Admin kullanıcıyı sadece super_admin düzenleyebilir
-    if (targetUser.role === 'admin' && currentUser.role !== 'super_admin') {
-      return {
-        success: false,
-        message: 'Admin kullanıcıyı sadece süper admin düzenleyebilir',
-      }
-    }
-
-    // 5. Form verilerini al
-    const rawData = {
-      full_name: formData.get('full_name'),
-      email: formData.get('email'),
-      password: formData.get('password') || undefined, // Boşsa undefined
-      role: formData.get('role') as string,
-      is_active: formData.get('is_active') === 'on',
-    }
-
-    // 6. Validasyon
-    const validatedData = updateUserSchema.safeParse(rawData)
-
-    if (!validatedData.success) {
-      return {
-        success: false,
-        message: validatedData.error.issues[0].message,
-      }
-    }
-
-    const { full_name, email, password, role, is_active } = validatedData.data
-
-    // 7. Email değiştiyse, başka kullanıcıda kullanılıyor mu kontrol et
-    if (email !== targetUser.email) {
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', email)
-        .neq('id', userId) // Kendisi hariç
-        .single()
-
-      if (existingUser) {
-        return {
-          success: false,
-          message: 'Bu email adresi başka bir kullanıcı tarafından kullanılıyor',
-        }
-      }
-    }
-
-    // 8. Role değiştirme kontrolü
-    // Admin rolüne yükseltmek için super_admin olmalı
-    if (role === 'admin' && targetUser.role !== 'admin' && currentUser.role !== 'super_admin') {
-      return {
-        success: false,
-        message: 'Admin rolü vermek için süper admin olmalısınız',
-      }
-    }
-
-    // 9. Güncellenecek veriler
-    const updateData: any = {
-      full_name,
-      email,
-      role,
-      is_active,
-    }
-
-    // Şifre değiştiyse hash'le ve ekle
-    if (password && password.trim() !== '') {
-      updateData.password_hash = await bcrypt.hash(password, 10)
-    }
-
-    // 10. Kullanıcıyı güncelle
-    const { error: updateError } = await supabase
-      .from('users')
-      .update(updateData)
-      .eq('id', userId)
-
-    if (updateError) {
-      console.error('Kullanıcı güncelleme hatası:', updateError)
-      return {
-        success: false,
-        message: 'Kullanıcı güncellenemedi',
-      }
-    }
-
-    // 11. Activity log kaydet
-    await supabase.from('activity_logs').insert({
-      user_id: currentUser.userId,
-      action: 'update_user',
-      entity_type: 'user',
-      entity_id: userId,
-    })
-
-  } catch (error) {
-    console.error('Kullanıcı güncelleme hatası:', error)
-    return {
-      success: false,
-      message: 'Bir hata oluştu, lütfen tekrar deneyin',
-    }
+  if (currentUser.role !== 'superadmin' && currentUser.role !== 'admin') {
+    return { success: false, message: 'Bu işlem için yetkiniz yok.' }
   }
 
-  // 12. Kullanıcı listesine yönlendir
+  // Admin, başka admin düzenleyemez
+  if (currentUser.role === 'admin' && formData.role === 'admin') {
+    return { success: false, message: 'Admin rolündeki kullanıcıyı düzenleme yetkiniz yok.' }
+  }
+
+  // Düzenlenecek kullanıcıyı çek
+  const { data: targetUser } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', id)
+    .single()
+
+  if (!targetUser) return { success: false, message: 'Kullanıcı bulunamadı.' }
+
+  // Superadmin düzenlenemez
+  if (targetUser.role === 'superadmin') {
+    return { success: false, message: 'Süper admin düzenlenemez.' }
+  }
+
+  // Email başkası tarafından kullanılıyor mu?
+  const { data: existing } = await supabaseAdmin
+    .from('users')
+    .select('id')
+    .eq('email', formData.email)
+    .neq('id', id)
+    .single()
+
+  if (existing) return { success: false, message: 'Bu email adresi zaten kullanımda.' }
+
+  // Güncellenecek alanları hazırla
+  const updateData: Record<string, string> = {
+    fullname: formData.fullname,
+    email: formData.email,
+    role: formData.role,
+  }
+
+  // Şifre girilmişse hashle
+  if (formData.password && formData.password.length >= 8) {
+    updateData.password_hash = await bcrypt.hash(formData.password, 10)
+  }
+
+  const { error } = await supabaseAdmin
+    .from('users')
+    .update(updateData)
+    .eq('id', id)
+
+  if (error) return { success: false, message: 'Güncelleme başarısız, lütfen tekrar deneyin.' }
+
+  // Log düş
+  await supabaseAdmin.from('logs').insert({
+    user_id: currentUser.sub,
+    action_type: 'user_updated',
+    content: `${formData.fullname} kullanıcısı güncellendi.`,
+  })
+
+  redirect('/admin/users')
+}
+
+export const deleteUser = async (id: string) => {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('admin_token')?.value
+
+  if (!token) return { success: false, message: 'Yetkisiz erişim.' }
+
+  const currentUser = await verifyAccesToken(token)
+
+  if (!currentUser) return { success: false, message: 'Yetkisiz erişim.' }
+
+  const { data: targetUser } = await supabaseAdmin
+    .from('users')
+    .select('role, fullname')
+    .eq('id', id)
+    .single()
+
+  if (!targetUser) return { success: false, message: 'Kullanıcı bulunamadı.' }
+
+  if (targetUser.role === 'superadmin') {
+    return { success: false, message: 'Süper admin silinemez.' }
+  }
+
+  if (currentUser.role === 'admin' && targetUser.role === 'admin') {
+    return { success: false, message: 'Admin rolündeki kullanıcıyı silme yetkiniz yok.' }
+  }
+
+  const { error } = await supabaseAdmin.from('users').delete().eq('id', id)
+
+  if (error) return { success: false, message: 'Silme işlemi başarısız.' }
+
+  await supabaseAdmin.from('logs').insert({
+    user_id: currentUser.sub,
+    action_type: 'user_deleted',
+    content: `${targetUser.fullname} kullanıcısı silindi.`,
+  })
+
   redirect('/admin/users')
 }

@@ -1,52 +1,41 @@
-// Kullanıcı düzenleme sayfası
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+// app/admin/(dashboard)/users/edit/[id]/page.tsx
+
+import { getUserById } from './actions'
 import EditUserForm from './EditUserForm'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
-type Props = {
-  params: Promise<{ id: string }> // Next.js 15+: params artık Promise
-}
+export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const user = await getUserById(id)
 
-export default async function EditUserPage(props: Props) {
-  // await ile params'ı aç
-  const params = await props.params
-  const userId = params.id
-  
-  // Kullanıcıyı getir
-  const { data: user, error } = await supabase
-    .from('users')
-    .select('id, full_name, email, role, is_active')
-    .eq('id', userId)
-    .single()
-
-  // Kullanıcı bulunamadı → 404
-  if (error || !user) {
-    notFound()
-  }
-
-  // Süper admin düzenlenemez → 404
-  if (user.role === 'super_admin') {
-    notFound()
-  }
+  if (!user) notFound()
 
   return (
-    <div className="max-w-2xl">
-      {/* Başlık ve Geri Butonu */}
-      <div className="flex items-center gap-4 mb-6">
+    <div className="max-w-xl space-y-6">
+
+      {/* Başlık */}
+      <div className="flex items-center gap-4">
         <Link
           href="/admin/users"
-          className="text-gray-600 hover:text-gray-900"
+          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all"
         >
-          ← Geri
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </Link>
-        <h1 className="text-2xl font-bold">Kullanıcı Düzenle</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Kullanıcı Düzenle</h1>
+          <p className="text-slate-400 text-sm mt-1">{user.fullname}</p>
+        </div>
       </div>
 
-      {/* Form Card */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <EditUserForm user={user} />
-      </div>
+      <EditUserForm id={user.id} initialData={{
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+      }} />
+
     </div>
   )
 }

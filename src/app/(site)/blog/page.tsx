@@ -1,24 +1,30 @@
-// ─────────────────────────────────────────────
-// app/blog/page.tsx
-// ─────────────────────────────────────────────
-import BlogList from "./BlogList";
-import PageTitle from "@/components/layouts/PageTitle";
+// app/(site)/blog/page.tsx
+
+import { supabase } from '@/lib/supabase'
+import PageTitle from '@/components/layouts/PageTitle'
+import BlogList from './BlogList'
+import { BlogPost } from '@/lib/blogData'
 
 export const metadata = {
   title: "Blog | Aurora Dil Eğitim Merkezi",
-  description: "Tercüme, dil öğrenimi ve Almanca hakkında faydalı yazılar.",
-};
+  description: "Tercüme ve dil öğrenimi hakkında güncel yazılar"
+}
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const { data } = await supabase
+    .from('blogs')
+    .select('id, slug, title, img, content, is_published, created_at, users(fullname)')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+
+  const posts = (data ?? []) as unknown as BlogPost[]
+
   return (
-    <main className="min-h-screen bg-white">
-      <PageTitle title="Blog" text="20 yıllık deneyimimizle online Almanca eğitiminde öncü konumdayız" />
-      {/* ── Blog List ── */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <BlogList />
-        </div>
-      </section>
-    </main>
-  );
+    <div>
+      <PageTitle title="Blog" text="Tercüme ve dil öğrenimi hakkında güncel yazılar" />
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <BlogList posts={posts} />
+      </div>
+    </div>
+  )
 }

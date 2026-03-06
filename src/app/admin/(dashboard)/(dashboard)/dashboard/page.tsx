@@ -4,6 +4,14 @@ import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
 import Link from 'next/link'
 
+interface Log {
+  id: string
+  action_type: string
+  content: string
+  created_at: string
+  users: { fullname: string; email: string } | null
+}
+
 export default async function DashboardPage() {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin_token')?.value
@@ -61,7 +69,7 @@ export default async function DashboardPage() {
     {
       label: 'Yeni Blog',
       description: 'Blog yazısı oluştur',
-      href: '/admin/blogs/create',
+      href: '/admin/blog/create',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
       ),
@@ -88,7 +96,7 @@ export default async function DashboardPage() {
     {
       label: 'Bloglar',
       description: 'Tüm blogları yönet',
-      href: '/admin/blogs',
+      href: '/admin/blog',
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
       ),
@@ -189,50 +197,103 @@ export default async function DashboardPage() {
       </div>
 
       {/* BÖLÜM 3 - Son Loglar */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Son İşlemler</h2>
-          <Link href="/admin/logs" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-            Tümünü gör →
-          </Link>
-        </div>
+      {/* BÖLÜM 3 - Son Loglar */}
+<div>
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Son İşlemler</h2>
+    <Link href="/admin/logs" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+      Tümünü gör →
+    </Link>
+  </div>
 
-        <div className="bg-slate-800 rounded-xl border border-white/10 overflow-hidden">
-          {logs && logs.length > 0 ? (
-            <div className="divide-y divide-white/5">
-              {logs.map((log:any) => (
-                <div key={log.id} className="flex items-center justify-between px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 text-sm font-bold shrink-0">
-                      {log.users?.fullname?.charAt(0).toUpperCase() ?? '?'}
+  <div className="bg-slate-800 rounded-xl border border-white/10 overflow-hidden">
+    {logs && logs.length > 0 ? (
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-slate-700/50">
+            <tr>
+              {['Kullanıcı', 'İşlem', 'Detay', 'Tarih'].map((h) => (
+                <th key={h} className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {logs.map((log: Log) => {
+              const actionTypeLabel: Record<string, { label: string; color: string }> = {
+                login:          { label: 'Giriş',                 color: 'bg-green-500/20 text-green-400' },
+                logout:         { label: 'Çıkış',                 color: 'bg-slate-500/20 text-slate-400' },
+                blog_created:   { label: 'Blog Oluşturuldu',      color: 'bg-blue-500/20 text-blue-400' },
+                blog_updated:   { label: 'Blog Güncellendi',      color: 'bg-yellow-500/20 text-yellow-400' },
+                blog_deleted:   { label: 'Blog Silindi',          color: 'bg-red-500/20 text-red-400' },
+                course_created: { label: 'Kurs Oluşturuldu',      color: 'bg-purple-500/20 text-purple-400' },
+                course_updated: { label: 'Kurs Güncellendi',      color: 'bg-yellow-500/20 text-yellow-400' },
+                course_deleted: { label: 'Kurs Silindi',          color: 'bg-red-500/20 text-red-400' },
+                user_created:   { label: 'Kullanıcı Oluşturuldu', color: 'bg-blue-500/20 text-blue-400' },
+                user_updated:   { label: 'Kullanıcı Güncellendi', color: 'bg-yellow-500/20 text-yellow-400' },
+                user_deleted:   { label: 'Kullanıcı Silindi',     color: 'bg-red-500/20 text-red-400' },
+              }
+              const action = actionTypeLabel[log.action_type] ?? {
+                label: log.action_type,
+                color: 'bg-slate-500/20 text-slate-400',
+              }
+              return (
+                <tr key={log.id} className="hover:bg-white/5 transition-colors">
+
+                  {/* Kullanıcı */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 text-sm font-bold shrink-0">
+                        {log.users?.fullname?.charAt(0).toUpperCase() ?? '?'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">
+                          {log.users?.fullname ?? 'Bilinmiyor'}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                         {log.users?.email ?? ''}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-white">
-                        {actionTypeLabel[log.action_type] ?? log.action_type}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {log.users?.fullname ?? 'Bilinmiyor'} · {log.content}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-slate-500 shrink-0 ml-4">
+                  </td>
+
+                  {/* İşlem */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${action.color}`}>
+                      {action.label}
+                    </span>
+                  </td>
+
+                  {/* Detay */}
+                  <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate">
+                    {log.content ?? '—'}
+                  </td>
+
+                  {/* Tarih */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     {new Date(log.created_at).toLocaleDateString('tr-TR', {
                       day: 'numeric',
                       month: 'short',
+                      year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-slate-500 text-sm">Henüz işlem kaydı bulunmuyor</p>
-            </div>
-          )}
-        </div>
+                  </td>
+
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
+    ) : (
+      <div className="text-center py-12">
+        <p className="text-slate-500 text-sm">Henüz işlem kaydı bulunmuyor</p>
+      </div>
+    )}
+  </div>
+</div>
 
     </div>
   )

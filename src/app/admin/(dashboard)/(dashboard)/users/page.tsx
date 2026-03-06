@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+import { verifyAccesToken } from '@/lib/jwt'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase'
 import DeleteUserButton from './DeleteUserButton'
@@ -13,6 +15,10 @@ export default async function UsersPage() {
   const adminCount = users?.filter(u => u.role === 'admin').length || 0
   const editorCount = users?.filter(u => u.role === 'editor').length || 0
 
+  const cookieStore = await cookies()
+  const token = cookieStore.get('admin_token')?.value
+  const currentUser = token ? await verifyAccesToken(token) : null
+  
   return (
     <div className="space-y-6">
       {/* Başlık */}
@@ -106,7 +112,9 @@ export default async function UsersPage() {
                         >
                           Düzenle
                         </Link>
-                        <DeleteUserButton userId={user.id} userName={user.fullname} />
+                        {currentUser?.role !== 'editor' && (
+                          <DeleteUserButton userId={user.id} userName={user.fullname} />
+                        )}                  
                       </div>
                     )}
                   </td>
