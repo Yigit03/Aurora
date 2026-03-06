@@ -32,7 +32,7 @@ export async function changePasswordAction(
     // Token'ı doğrula
     const currentUser = await verifyAccesToken(token)
 
-    if (!currentUser || currentUser.userId !== userId) {
+    if (!currentUser || currentUser.sub !== userId) {
       return {
         success: false,
         message: 'Yetkisiz işlem',

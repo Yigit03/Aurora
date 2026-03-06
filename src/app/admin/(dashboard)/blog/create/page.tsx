@@ -1,5 +1,3 @@
-// app/admin/(dashboard)/blogs/create/page.tsx
-
 import CreateBlogForm from './CreateBlogForm'
 import Link from 'next/link'
 

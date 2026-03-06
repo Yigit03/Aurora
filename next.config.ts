@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,  // "aurora-v3/ benim köküm" der
+  },
   images: {
     remotePatterns: [
       {

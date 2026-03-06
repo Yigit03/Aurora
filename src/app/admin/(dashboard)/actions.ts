@@ -25,10 +25,10 @@ export async function logoutAction() {
         if (payload) {
           // Logout log'u kaydet
           await supabase.from('activity_logs').insert({
-            user_id: payload.userId,
+            user_id: payload.sub,
             action: 'logout',
             entity_type: 'user',
-            entity_id: payload.userId,
+            entity_id: payload.sub,
           })
         }
       } catch (error) {

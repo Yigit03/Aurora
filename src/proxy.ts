@@ -6,7 +6,7 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!)
 const LOGIN_PAGE = '/admin'
 const DASHBOARD = '/admin/dashboard'
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
     console.log('MIDDLEWARE ÇALIŞTI:', pathname)
   const token = req.cookies.get('admin_token')?.value
