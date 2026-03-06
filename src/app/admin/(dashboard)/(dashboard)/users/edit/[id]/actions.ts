@@ -1,5 +1,3 @@
-// app/admin/(dashboard)/users/edit/[id]/actions.ts
-
 'use server'
 
 import { supabaseAdmin } from '@/lib/supabase'
@@ -37,13 +35,9 @@ export const updateUser = async (
 
   if (!currentUser) return { success: false, message: 'Yetkisiz erişim.' }
 
-  if (currentUser.role !== 'superadmin' && currentUser.role !== 'admin') {
+  // Editör hiçbir kullanıcıyı güncelleyemez
+  if (currentUser.role === 'editor') {
     return { success: false, message: 'Bu işlem için yetkiniz yok.' }
-  }
-
-  // Admin, başka admin düzenleyemez
-  if (currentUser.role === 'admin' && formData.role === 'admin') {
-    return { success: false, message: 'Admin rolündeki kullanıcıyı düzenleme yetkiniz yok.' }
   }
 
   // Düzenlenecek kullanıcıyı çek
@@ -58,6 +52,16 @@ export const updateUser = async (
   // Superadmin düzenlenemez
   if (targetUser.role === 'superadmin') {
     return { success: false, message: 'Süper admin düzenlenemez.' }
+  }
+
+  // Admin, başka bir admin'i düzenleyemez (kendisi hariç)
+  if (currentUser.role === 'admin' && targetUser.role === 'admin' && currentUser.sub !== id) {
+    return { success: false, message: 'Admin rolündeki kullanıcıyı düzenleme yetkiniz yok.' }
+  }
+
+  // Admin, rol olarak admin'den yüksek atayamaz (superadmin koruması)
+  if (currentUser.role === 'admin' && formData.role === 'superadmin' as string) {
+    return { success: false, message: 'Bu rolü atama yetkiniz yok.' }
   }
 
   // Email başkası tarafından kullanılıyor mu?
@@ -109,6 +113,11 @@ export const deleteUser = async (id: string) => {
 
   if (!currentUser) return { success: false, message: 'Yetkisiz erişim.' }
 
+  // Editör kullanıcı silemez
+  if (currentUser.role === 'editor') {
+    return { success: false, message: 'Bu işlem için yetkiniz yok.' }
+  }
+
   const { data: targetUser } = await supabaseAdmin
     .from('users')
     .select('role, fullname')
@@ -117,12 +126,19 @@ export const deleteUser = async (id: string) => {
 
   if (!targetUser) return { success: false, message: 'Kullanıcı bulunamadı.' }
 
+  // Superadmin silinemez
   if (targetUser.role === 'superadmin') {
     return { success: false, message: 'Süper admin silinemez.' }
   }
 
+  // Admin, başka bir admini silemez
   if (currentUser.role === 'admin' && targetUser.role === 'admin') {
     return { success: false, message: 'Admin rolündeki kullanıcıyı silme yetkiniz yok.' }
+  }
+
+  // Kullanıcı kendini silemez
+  if (currentUser.sub === id) {
+    return { success: false, message: 'Kendinizi silemezsiniz.' }
   }
 
   const { error } = await supabaseAdmin.from('users').delete().eq('id', id)

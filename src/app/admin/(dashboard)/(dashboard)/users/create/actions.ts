@@ -15,8 +15,7 @@ export interface CreateUserFormData {
   role: 'admin' | 'editor'
 }
 
-export const createUser = async (formData: CreateUserFormData) => {
-  // Mevcut kullanıcının yetkisini kontrol et
+const createUser = async (formData: CreateUserFormData) => {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin_token')?.value
 
@@ -26,13 +25,19 @@ export const createUser = async (formData: CreateUserFormData) => {
 
   if (!currentUser) return { success: false, message: 'Yetkisiz erişim.' }
 
-  if (currentUser.role !== 'superadmin' && currentUser.role !== 'admin') {
+  // Editör kullanıcı oluşturamaz
+  if (currentUser.role === 'editor') {
     return { success: false, message: 'Bu işlem için yetkiniz yok.' }
   }
 
   // Admin sadece editor oluşturabilir
-  if (currentUser.role === 'admin' && formData.role === 'admin') {
-    return { success: false, message: 'Admin rolünde kullanıcı oluşturma yetkiniz yok.' }
+  if (currentUser.role === 'admin' && formData.role !== 'editor') {
+    return { success: false, message: 'Sadece editör rolünde kullanıcı oluşturabilirsiniz.' }
+  }
+
+  // Superadmin rolü sadece superadmin atayabilir
+  if (currentUser.role !== 'superadmin' && formData.role === 'superadmin' as string) {
+    return { success: false, message: 'Superadmin rolü atanamaz.' }
   }
 
   // Email kontrolü
@@ -69,4 +74,20 @@ export const createUser = async (formData: CreateUserFormData) => {
   })
 
   redirect('/admin/users')
+}
+
+export const createUserAction = async (
+  prevState: { success: boolean; message: string },
+  formData: FormData
+) => {
+  return createUser({
+    fullname: formData.get('fullname') as string,
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+    role: formData.get('role') as 'admin' | 'editor',
+  })
+}
+
+export const createUserDirect = async (formData: CreateUserFormData) => {
+  return createUser(formData)
 }

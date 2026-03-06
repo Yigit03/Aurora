@@ -1,9 +1,7 @@
-// app/admin/(dashboard)/users/create/page.tsx
-
 'use client'
 
 import { useState } from 'react'
-import { createUser } from './actions'
+import { createUserDirect } from './actions'
 import Link from 'next/link'
 
 export default function CreateUserPage() {
@@ -25,7 +23,7 @@ export default function CreateUserPage() {
     setLoading(true)
     setError('')
 
-    const result = await createUser(form)
+    const result = await createUserDirect(form)
 
     if (result?.success === false) {
       setError(result.message)

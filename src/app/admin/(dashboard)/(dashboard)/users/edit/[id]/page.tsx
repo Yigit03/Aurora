@@ -1,5 +1,3 @@
-// app/admin/(dashboard)/users/edit/[id]/page.tsx
-
 import { getUserById } from './actions'
 import EditUserForm from './EditUserForm'
 import Link from 'next/link'
