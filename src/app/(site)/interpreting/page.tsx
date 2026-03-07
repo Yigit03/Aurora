@@ -3,11 +3,20 @@ import CTASection from "@/components/layouts/Cta";
 import PageTitle from "@/components/layouts/PageTitle";
 
 const STATS = [
-  { value: "10+", label: "Yıllık Deneyim" },
-  { value: "5.000+", label: "Tamamlanan Proje" },
-  { value: "20+", label: "Dil Çifti" },
-  { value: "98%", label: "Müşteri Memnuniyeti" },
+  { value: "20+", label: "Yıllık Deneyim" },
+  { value: "500+", label: "Tamamlanan Proje" },
+  { value: "2+", label: "Dil Çifti" },
+  { value: "99%", label: "Müşteri Memnuniyeti" },
 ];
+
+export const metadata = {
+  title: "Tercüme | Aurora Dil Eğitim Merkezi",
+  description: "Profesyonel eğitmenlerle online Almanca öğrenin..."
+};
+
+const whatsappNumber = "905462071948";
+const whatsappMsg = encodeURIComponent("Merhaba, çeviri projem için teklif almak istiyorum. \n -web-");
+const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
 
 export default function InterpretingPage() {
   return (
@@ -48,7 +57,7 @@ export default function InterpretingPage() {
       <CTASection 
       textTitle="Çeviri Projeniz İçin Teklif Alın!" 
       text="Proje detaylarınızı bize gönderin, size özel en uygun fiyat teklifini hazırlayalım." 
-      route="" 
+      route={whatsappUrl}
       buttonTitle="Teklif Alın!" 
       buttonVariant="cta" />
     </main>

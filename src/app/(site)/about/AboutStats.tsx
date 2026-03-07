@@ -20,8 +20,8 @@ const stats: Stat[] = [
   {
     icon: BookOpen,
     iconColor: "text-yellow-500",
-    number: "50+",
-    label: "Ders Modülü",
+    number: "2026+",
+    label: "Sonrası Güncel Müfredat",
   },
   {
     icon: Award,
@@ -32,8 +32,8 @@ const stats: Stat[] = [
   {
     icon: Globe,
     iconColor: "text-red-500",
-    number: "15+",
-    label: "Ülke",
+    number: "500+",
+    label: "Ders",
   },
 ];
 

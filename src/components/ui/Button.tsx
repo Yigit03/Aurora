@@ -14,6 +14,9 @@ import React from "react"; // [BLOK 2: IMPORT]
 // Sadece bu üç seçenekten biri seçilebilir:
 export type ButtonVariant = "primary" | "secondary"  | "danger" | "outline" | "cta" | "none" ;
 
+//whatsapp yönlendirme
+const phoneNumber = 905462071948;
+const url = `https://wa.me/${phoneNumber}?text=Merhaba, çeviri projem için teklif almak istiyorum. \n -web-`;
 // Bileşenin dışarıdan alacağı (props) özelliklerin listesi:
 type ButtonProps = {
   title: string;           // Butonun içinde yazacak metin (Zorunlu)
