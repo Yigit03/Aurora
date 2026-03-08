@@ -10,7 +10,10 @@ export const metadata = {
   description: "Tercüme ve dil öğrenimi hakkında güncel yazılar"
 }
 
+export const revalidate = 60;
+
 export default async function BlogPage() {
+  // Veri çekme işlemin...
   const { data } = await supabase
     .from('blogs')
     .select('id, slug, title, img, content, is_published, created_at, users(fullname)')

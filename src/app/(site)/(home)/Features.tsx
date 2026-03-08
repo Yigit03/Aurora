@@ -15,19 +15,19 @@ const featureList: FeatureItem[] = [
     icon: BookOpen,
     iconColor: "text-red-500",
     title: "Kapsamlı Müfredat",
-    description: "A1'den C2'ye kadar tüm seviyeler için detaylı ders planları",
+    description: "A1'den C1'e kadar tüm seviyeler için detaylı ders planları",
   },
   {
     icon: Users,
     iconColor: "text-yellow-500",
     title: "Uzman Eğitmenler",
-    description: "Anadili Almanca olan deneyimli öğretmenlerle birebir dersler",
+    description: "Anadili Almanca olan deneyimli Türk öğretmenlerle birebir dersler",
   },
   {
     icon: Award,
     iconColor: "text-blue-400",
     title: "Sertifika",
-    description: "Uluslararası geçerliliği olan sertifikalar kazanın",
+    description: "Uzman eğitmenlerimiz ile sertifikasyon sınavlarına hazırlanın",
   },
   {
     icon: Clock,

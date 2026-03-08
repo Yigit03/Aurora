@@ -32,8 +32,8 @@ export default function Hero() {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg">
-              Profesyonel eğitmenlerle birebir online dersler alın.
-              Esnek saatler, interaktif müfredat ve garantili başarı.
+              Goethe & Telc Sınav Odaklı Eğitim. <br />
+              Profesyonel eğitmenlerle ister grup <br /> ister birebir online dersler alın.
             </p>
 
             {/* ── CTA Butonları: yan yana, eşit genişlik ── */}
