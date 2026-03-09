@@ -2,6 +2,8 @@
 
 import { supabase } from '@/lib/supabase'
 
+export const revalidate = 60;
+
 type check = {
   checkBg: string
   checkColor: string
@@ -51,7 +53,7 @@ export default async function Cards() {
     .from('courses')
     .select('*')
     .eq('is_published', true)
-    .order('order_index', { ascending: true })
+    .order('order_index', { ascending: false })
 
   const phone = "905462071948"
   const message = "Merhabalar, kurs fiyatları hakkında bilgi almak istiyorum \n -web-"
