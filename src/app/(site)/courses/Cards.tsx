@@ -53,7 +53,7 @@ export default async function Cards() {
     .from('courses')
     .select('*')
     .eq('is_published', true)
-    .order('order_index', { ascending: false })
+    .order('order_index', { ascending: true })
 
   const phone = "905462071948"
   const message = "Merhabalar, kurs fiyatları hakkında bilgi almak istiyorum \n -web-"
