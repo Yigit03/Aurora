@@ -31,7 +31,7 @@ const ExamsList = () => {
   ];
 
   return (
-    <div className="bg-blue-600 py-8 border-b border-gray-100">
+    <div className="bg-red-600 py-8 border-b border-gray-100">
       {/* Tüm bileşeni saran ana container.
           Kırmızı arka plan, dikey padding ve alt border içerir. */}
 
