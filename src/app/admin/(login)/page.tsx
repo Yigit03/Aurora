@@ -149,7 +149,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-600 mt-6">
-          2026 Copyright.{" "}
+          2025 Copyright.{" "}
           <a href="https://www.sembyweb.com" className="text-slate-500 hover:text-slate-400 transition-colors">
             Sembyweb
           </a>{" "}

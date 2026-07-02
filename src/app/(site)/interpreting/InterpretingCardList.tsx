@@ -1,5 +1,5 @@
 import InterpretingCard, { InterpretingCardProps } from "./InterpretingCard";
-import { FileText, MessageSquare, Scale, Briefcase, GraduationCap } from "lucide-react";
+import { FileText, MessageSquare, Scale, Briefcase, GraduationCap, Handshake } from "lucide-react";
 
 const SERVICES: InterpretingCardProps[] = [
   {
@@ -68,6 +68,20 @@ const SERVICES: InterpretingCardProps[] = [
       "Hakemli dergi makaleleri",
       "Burs başvuru dosyaları",
       "Ders notları & ders kitapları",
+    ],
+    accentColor: "text-red-600",
+    iconBg: "bg-red-50",
+  },
+    {
+    icon: <Handshake size={28} />,
+    title: "Danışmanlık",
+    description:
+      "Almanya'da yaşam ve Almanyaya göç ile ilgili her konuda size yardımcı olmaya hazırız.",
+    features: [
+      "Almanya Vize",
+      "Almanya'da Eğitim",
+      "Almanya'da Çalışma Hayatı",
+      "Bilinmesi gerekenler",
     ],
     accentColor: "text-red-600",
     iconBg: "bg-red-50",
