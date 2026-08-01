@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { ExamQuestion, submitExam } from './actions'
 import { CheckCircle, ChevronRight, Loader2, Mail, User } from 'lucide-react'
 
+export const revalidate = 60; // 60 saniyelik aralıklarla Server a istek atar ve güncel verileri çekmesini sağlar. 
+
 interface Props {
   questions: ExamQuestion[]
 }
-
+ 
 type Step = 'info' | 'test' | 'result'
 
 interface ResultData {

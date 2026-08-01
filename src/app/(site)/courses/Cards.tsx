@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase'
 
-export const revalidate = 60;
+export const revalidate = 60; // 60 saniyelik periyotlarla servera istek atar ve güncel verileri çeker. 
 
 type check = {
   checkBg: string
