@@ -1,10 +1,11 @@
 // app/(site)/exam/actions.ts
+
 'use server'
 
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-
-export const revalidate = 60
+import { revalidate } from './ExamClient'
+import { revalidatePath } from 'next/cache'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -42,6 +43,8 @@ export const getExamQuestions = async (): Promise<ExamQuestion[]> => {
     }
     console.log('getExamQuestions data:', data)
 
+    revalidatePath('/exam');
+    
   return (data ?? []) as ExamQuestion[]
 }
 
