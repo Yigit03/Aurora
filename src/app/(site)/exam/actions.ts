@@ -27,12 +27,19 @@ export interface ExamResult {
 }
 
 export const getExamQuestions = async (): Promise<ExamQuestion[]> => {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('exam_questions')
     .select('id, question, option_a, option_b, option_c, option_d, correct_answer, level, order_index')
     .eq('is_active', true)
     .order('level', { ascending: true })
     .order('order_index', { ascending: true })
+
+    if (error) {
+      console.error('getExamQuestions error:', error)
+      throw new Error(`Sınav soruları alınamadı: ${error.message}`)
+    }
+    console.log('getExamQuestions data:', data)
+
   return (data ?? []) as ExamQuestion[]
 }
 
