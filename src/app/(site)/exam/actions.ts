@@ -3,7 +3,6 @@
 
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { revalidatePath } from 'next/cache'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -40,8 +39,6 @@ export const getExamQuestions = async (): Promise<ExamQuestion[]> => {
       throw new Error(`Sınav soruları alınamadı: ${error.message}`)
     }
     console.log('getExamQuestions data:', data)
-
-    revalidatePath('/exam');
 
   return (data ?? []) as ExamQuestion[]
 }

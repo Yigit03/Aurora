@@ -9,6 +9,8 @@ export const metadata = {
   description: 'Ücretsiz Almanca seviye tespitiyle başlangıç noktanızı belirleyin.',
 }
 
+export const revalidate = 60
+
 export default async function ExamPage() {
   const questions = await getExamQuestions()
 
